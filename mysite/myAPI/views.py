@@ -1,4 +1,5 @@
 from http.client import HTTPResponse
+import json
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse
 
@@ -18,6 +19,14 @@ class unLivre(APIView):
     def get(self, request, id, format = None):
         response = requests.get(baseUrl + "/" + str(id) + "/")
         jsondata = response.json()
+        return Response(jsondata)
+
+class livreHTML(APIView):
+    def get(self, request, format = None):
+        prot = request.GET.get("prot")
+        adr = request.GET.get("adr")
+        response = requests.get(prot + "://" + adr)
+        jsondata = json.dumps({"html": response.text.replace("\r", "").replace("\n", "").replace("\"", "")})
         return Response(jsondata)
 
 class desLivres(APIView):

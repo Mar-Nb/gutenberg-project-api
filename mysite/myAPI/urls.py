@@ -8,4 +8,5 @@ urlpatterns = [
     path("livres/<int:page>/", views.desLivres.as_view()),
     path("livres/", views.desLivres.as_view()),
     path("recherche/<str:strSearch>/", views.rechercheLivres.as_view()),
+    path("livreHTML/", views.livreHTML.as_view()),
 ]
