@@ -1,11 +1,13 @@
 from http.client import HTTPResponse
 import json, os
+from lib2to3.pytree import convert
 from pydoc import resolve
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse
 from django.conf import settings
 
 import requests
+import re
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from myAPI.config import baseUrl
@@ -56,7 +58,49 @@ class indexJSON(APIView):
 
 class livresAccueil(APIView):
     def get(self, request, format = None):
-        listeId = request.GET.get("ids", "1,2,3")
+        staticFile = "static" + os.sep + "myAPI" + os.sep + "liste_livre.json"
+        f = os.path.join(settings.BASE_DIR, staticFile)
+        indexFile = open(f)
+        jsondata = json.load(indexFile)
+        # page = request.GET.get("page", 1)
+        # nbCard = 15
+        noLimit = request.GET.get("noLimit", False)
+        print(noLimit)
+        if not bool(noLimit):
+            listeId = ",".join(jsondata[0:15])
+        else:
+            listeId = ",".join(jsondata)
+
         response = requests.get(baseUrl + "/?ids=" + listeId)
         jsondata = response.json()
         return Response(jsondata)
+
+class advanceSearch(APIView):
+    def get(self, request, format = None):
+        mot = request.GET.get("mot", "")
+        valeur=mot.replace("%", " ")
+        valeur = valeur.split(" ")
+        mot = ""
+        for c in valeur:
+            mot += chr(int(c))
+        key=[]
+        final=[]
+        liste_index = []
+        staticFile = "static" + os.sep + "myAPI" + os.sep + "indexFinal3.json"
+        f = os.path.join(settings.BASE_DIR, staticFile)
+        indexFile = open(f)
+        jsondata = json.load(indexFile)
+        jsondata = json.loads(jsondata)
+
+        for e in jsondata.keys():
+            valeur=re.match(mot,e)
+            if valeur !=None:
+                key.append(e)
+                liste_index += jsondata.get(e)[0].keys()
+        print(liste_index)        
+        liste_index = ",".join(liste_index)
+        response = requests.get(baseUrl + "/?ids=" + liste_index)
+        jsondata = response.json()
+        print(key)
+        return Response(jsondata)
+ 

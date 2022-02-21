@@ -11,4 +11,5 @@ urlpatterns = [
     path("livreHTML/", views.livreHTML.as_view()),
     path("livresAccueil/", views.livresAccueil.as_view()),
     path("indexRecherche/", views.indexJSON.as_view()),
+    path("searchAdvance/", views.advanceSearch.as_view()),
 ]
