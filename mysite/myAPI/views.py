@@ -97,10 +97,10 @@ class advanceSearch(APIView):
             if valeur !=None:
                 key.append(e)
                 liste_index += jsondata.get(e)[0].keys()
-        print(liste_index)        
+                if len(key) > 9:
+                    break
         liste_index = ",".join(liste_index)
         response = requests.get(baseUrl + "/?ids=" + liste_index)
         jsondata = response.json()
-        print(key)
         return Response(jsondata)
  
