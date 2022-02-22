@@ -1,9 +1,5 @@
-from http.client import HTTPResponse
-import json, os
-from lib2to3.pytree import convert
-from pydoc import resolve
-from django.shortcuts import render
-from django.http import HttpResponse, Http404, JsonResponse
+import json, os, math
+from django.http import HttpResponse
 from django.conf import settings
 
 import requests
@@ -13,6 +9,7 @@ from rest_framework.response import Response
 from myAPI.config import baseUrl
 
 import urllib.parse
+from distutils.util import strtobool
 
 # Create your views here.
 
@@ -62,29 +59,52 @@ class livresAccueil(APIView):
         f = os.path.join(settings.BASE_DIR, staticFile)
         indexFile = open(f)
         jsondata = json.load(indexFile)
-        # page = request.GET.get("page", 1)
-        # nbCard = 15
-        noLimit = request.GET.get("noLimit", False)
-        print(noLimit)
-        if not bool(noLimit):
-            listeId = ",".join(jsondata[0:15])
+        localCount = len(jsondata)
+
+        nbCard = 15
+        page = request.GET.get("page", 1)
+        oldCardMax = request.GET.get("oldMax", None)
+        isForward = request.GET.get("isForward", None)
+        noLimit = request.GET.get("noLimit", None)
+
+        if noLimit == None or not bool(strtobool(noLimit)):
+            if int(page) == 1:
+                listeId = ",".join(jsondata[0:nbCard])
+                borneSup = nbCard
+            else:
+                if bool(strtobool(isForward)):
+                    borneInf = int(oldCardMax) + 1
+                else:
+                    borneInf = int(oldCardMax) + 1 - nbCard * 2
+                borneSup = borneInf + nbCard
+
+                if borneSup >= localCount:
+                    listeId = ",".join(jsondata[borneInf:])
+                else:
+                    listeId = ",".join(jsondata[borneInf:borneSup])
         else:
             listeId = ",".join(jsondata)
 
+        print(listeId)
         response = requests.get(baseUrl + "/?ids=" + listeId)
         jsondata = response.json()
+        jsondata["localCount"] = localCount
+        
+        if noLimit == None or not bool(strtobool(noLimit)):
+            jsondata["borneMax"] = borneSup - 1
+            
         return Response(jsondata)
 
 class advanceSearch(APIView):
     def get(self, request, format = None):
         mot = request.GET.get("mot", "")
-        valeur=mot.replace("%", " ")
+        valeur = mot.replace("%", " ")
         valeur = valeur.split(" ")
         mot = ""
         for c in valeur:
             mot += chr(int(c))
-        key=[]
-        final=[]
+        key = []
+        final = []
         liste_index = []
         staticFile = "static" + os.sep + "myAPI" + os.sep + "indexFinal3.json"
         f = os.path.join(settings.BASE_DIR, staticFile)
@@ -93,8 +113,8 @@ class advanceSearch(APIView):
         jsondata = json.loads(jsondata)
 
         for e in jsondata.keys():
-            valeur=re.match(mot,e)
-            if valeur !=None:
+            valeur = re.match(mot,e)
+            if valeur != None:
                 key.append(e)
                 liste_index += jsondata.get(e)[0].keys()
         print(liste_index)        
