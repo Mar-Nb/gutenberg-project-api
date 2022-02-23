@@ -45,13 +45,13 @@ Aller dans le dossier du projet :
 Installer les dépendences :
 
 ```bash
-  npm install
+  pip install ...
 ```
 
 Lancer le serveur :
 
 ```bash
-  npm start
+  python manage.py runserver
 ```
 
 Par défaut, le serveur écoute à l'adresse http://localhost:8000.
