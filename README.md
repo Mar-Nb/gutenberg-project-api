@@ -42,10 +42,10 @@ Aller dans le dossier du projet :
   cd gutenberg-project-api
 ```
 
-Installer les dépendences :
+Installer les dépendences (vous pouvez aussi les installer dans un environnement virtuel) :
 
 ```bash
-  pip install ...
+  pip install django djangorestframework requests
 ```
 
 Lancer le serveur :
